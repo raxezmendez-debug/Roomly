@@ -1,0 +1,7 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "webapp/WEB-INF/lib/mysql-connector-j-26.7.0.jar",
+        "c:\\DESCARGA DE SOFTWARE\\JAVA\\apache-tomcat-9.0.120-windows-x64\\apache-tomcat-9.0.120\\lib\\servlet-api.jar"
+    ]
+}

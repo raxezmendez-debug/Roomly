@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roomly - PMS Property Management System</title>
+    <!-- Font Awesome para Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Estilos locales (ya no depende del CDN de Tailwind, que estaba caído) -->
+    <link rel="stylesheet" href="./styles.css?v=3" type="text/css">
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- Top Bar Navigation -->
+    <header class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-4">
+            <button class="text-slate-500 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+            <!-- Logo Roomly -->
+            <div class="flex items-center space-x-2">
+                <div class="bg-indigo-600 text-white p-2 rounded-xl flex items-center justify-center font-bold text-lg w-9 h-9">
+                    R
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">Roomly</span>
+                <!-- <span class="text-xs bg-indigo-50 text-indigo-600 font-semibold px-2 py-0.5 rounded-full border border-indigo-100">PMS</span> -->
+            </div>
+        </div>
+
+        <!-- Search bar -->
+        <div class="flex-1 max-w-md mx-8">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" placeholder="Buscar reserva, huésped o habitación..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+            </div>
+        </div>
+
+        <!-- Profile & Action Buttons -->
+        <div class="flex items-center space-x-3">
+            <button onclick="abrirModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm px-4 py-2 rounded-xl flex items-center space-x-2 shadow-sm shadow-indigo-200 transition-all active:scale-95">
+                <i class="fa-solid fa-plus text-xs"></i>
+                <span>Nueva Reserva</span>
+            </button>
+            <div class="h-6 w-px bg-slate-200"></div>
+            <button class="text-slate-500 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100 relative">
+                <i class="fa-regular fa-bell"></i>
+                <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            <div class="flex items-center space-x-2 pl-2">
+                <div class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-semibold text-xs">
+                    CA
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Control Bar (Fechas, Filtros y Estado) -->
+    <div class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shrink-0 shadow-xs">
+        <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl">
+                <button class="p-1.5 hover:bg-white text-slate-600 rounded-lg transition-all text-xs"><i class="fa-solid fa-list"></i></button>
+                <button class="p-1.5 bg-white text-indigo-600 rounded-lg shadow-xs font-semibold transition-all text-xs"><i class="fa-solid fa-calendar-days"></i></button>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <button class="p-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 text-xs"><i class="fa-solid fa-chevron-left"></i></button>
+                <button class="px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 font-semibold text-xs uppercase tracking-wider">HOY</button>
+                <button class="p-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 text-xs"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+
+            <h3 class="text-lg font-bold text-slate-800 ml-2">FEBRERO 2026</h3>
+        </div>
+
+        <!-- Leyendas / Filtros -->
+        <div class="flex items-center space-x-6 text-xs font-medium">
+            <div class="flex items-center space-x-2">
+                <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                <span class="text-slate-600">Check-In</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
+                <span class="text-slate-600">Confirmado</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                <span class="text-slate-600">Pendiente</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="w-3 h-3 rounded-full bg-slate-500"></span>
+                <span class="text-slate-600">Check-Out / Mantenimiento</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- PMS Main Calendar Matrix Container -->
+    <main class="flex-1 overflow-hidden p-4 flex flex-col">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm flex-1 flex flex-col overflow-hidden">
+
+            <!-- Matrix Scroll Wrapper -->
+            <div class="flex-1 overflow-auto custom-scrollbar flex" id="calendarContainer">
+
+                <!-- Fixed Left Sidebar: Room Types & Numbers -->
+                <div class="sticky left-0 bg-white z-20 border-r border-slate-200 w-48 shrink-0 shadow-md">
+                    <!-- Column Header Blank -->
+                    <div class="h-20 border-b border-slate-200 px-4 flex items-center justify-between bg-slate-50">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Habitación</span>
+                        <i class="fa-solid fa-filter text-slate-400 text-xs"></i>
+                    </div>
+
+                    <!-- Category Title -->
+                    <div class="bg-slate-100/80 px-4 py-2 border-b border-slate-200 font-bold text-xs text-slate-600 flex items-center justify-between">
+                        <span>Deluxe Queen</span>
+                        <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
+                    </div>
+
+                    <!-- Room List -->
+                    <div id="roomList">
+                        <!-- Dynamic Rooms loaded via JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Scrollable Right Content: Dates & Reservations Grid -->
+                <div class="flex-1 flex flex-col min-w-max">
+
+                    <!-- Days Header Row -->
+                    <div class="flex border-b border-slate-200 bg-slate-50 shrink-0 h-20" id="headerDaysRow">
+                        <!-- Loaded dynamically -->
+                    </div>
+
+                    <!-- Grid Rows for Rooms -->
+                    <div class="flex-1 relative divide-y divide-slate-100" id="gridMatrixRows">
+                        <!-- Loaded dynamically -->
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Footer KPI Summary Bar -->
+            <div class="bg-slate-50 border-t border-slate-200 px-6 py-2 flex items-center justify-between text-xs text-slate-500 shrink-0">
+                <div class="flex items-center space-x-4">
+                    <span class="font-medium"><strong class="text-slate-800">14</strong>Habitaciones totales</span>
+                    <span>•</span>
+                    <span class="font-medium"><strong class="text-emerald-600">82%</strong>Ocupación Promedio</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-circle-info text-indigo-500"></i>
+                    <span>Arrastra y suelta cualquier barra de reserva para reprogramar las fechas.</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal para Nueva Reserva (Compatible con datos de la evidencia SENA GA7-220501096-AA2-EV02) -->
+    <div id="modalReserva" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-backdrop">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden border border-slate-100 transform transition-all">
+
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-4 flex items-center justify-between text-white">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-calendar-plus text-lg"></i>
+                    <h3 class="font-bold text-lg">Registrar Nueva Reserva - Roomly</h3>
+                </div>
+                <button onclick="cerrarModal()" class="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Modal Form for Java Servlet submission -->
+            <form id="formNuevaReserva" action="ReservaServlet" method="POST" class="p-6 space-y-4">
+
+                <p class="text-xs text-slate-500 font-medium border-b border-slate-100 pb-2">
+                    <i class="fa-solid fa-user-check text-indigo-500 mr-1"></i> Datos del Huésped (Requeridos por la Evidencia)
+                </p>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Documento de Identidad *</label>
+                        <input type="text" name="documento" required placeholder="Ej: 1020304050" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Teléfono de Contacto *</label>
+                        <input type="tel" name="telefono" required placeholder="Ej: 3001234567" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Nombres *</label>
+                        <input type="text" name="nombres" required placeholder="Ej: Cameron" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Apellidos *</label>
+                        <input type="text" name="apellidos" required placeholder="Ej: Harrison" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Correo Electrónico *</label>
+                    <input type="email" name="correo" required placeholder="cameron.harrison@email.com" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                </div>
+
+                <p class="text-xs text-slate-500 font-medium border-b border-slate-100 pt-2 pb-2">
+                    <i class="fa-solid fa-hotel text-indigo-500 mr-1"></i> Asignación de Habitación y Fechas (PMS)
+                </p>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Habitación *</label>
+                        <select name="habitacion" id="selectHabitacion" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                            <!-- Populated with JS -->
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Fecha Check-In *</label>
+                        <input type="date" name="fechaEntrada" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Fecha Check-Out *</label>
+                        <input type="date" name="fechaSalida" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                    </div>
+                </div>
+
+                <div class="pt-4 flex items-center justify-end space-x-3 border-t border-slate-100">
+                    <button type="button" onclick="cerrarModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 font-medium text-sm hover:bg-slate-50 transition-all">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl shadow-md shadow-indigo-200 transition-all">
+                        Guardar Reserva
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para EDITAR Reserva -->
+    <div id="modalEditarReserva" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-backdrop">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden border border-slate-100 transform transition-all">
+            <div class="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-4 flex items-center justify-between text-white">
+                <h3 class="font-bold text-lg">Editar Reserva</h3>
+                <button onclick="cerrarModalEditar()" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="formEditarReserva" class="p-6 space-y-4">
+                <input type="hidden" id="editId">
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-xs font-bold text-slate-700">Huésped</label><input type="text" id="editHuesped" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm"></div>
+                    <div><label class="block text-xs font-bold text-slate-700">Documento</label><input type="text" id="editDocumento" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm"></div>
+                    <div><label class="block text-xs font-bold text-slate-700">Teléfono</label><input type="text" id="editTelefono" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm"></div>
+                    <div><label class="block text-xs font-bold text-slate-700">Correo</label><input type="email" id="editCorreo" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm"></div>
+                </div>
+                <div><label class="block text-xs font-bold text-slate-700">Estado</label><select id="editEstado" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm"><option value="status-confirmed">Confirmado</option><option value="status-checkin">Check-In</option><option value="status-pending">Pendiente</option></select></div>
+                <button type="submit" class="w-full py-2 bg-amber-600 text-white rounded-xl font-medium">Actualizar</button>
+            </form>
+        </div>
+    </div>
+
+        <!-- Logic & Calendar Matrix JS Script -->
+        <!-- (ES) Lógica y matriz del calendario: carga javascript.js que inicializa
+            y gestiona el calendario, carga reservas desde el servlet y controla
+            los modales y el drag & drop. -->
+    <script src="javascript.js" defer></script>
+</body>
+</html>
