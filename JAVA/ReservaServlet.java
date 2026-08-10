@@ -35,8 +35,8 @@ public class ReservaServlet extends HttpServlet {
         StringBuilder json = new StringBuilder("[");
 
         try (Connection con = ConexionDB.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+            PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()) {
 
             boolean primero = true;
             while (rs.next()) {

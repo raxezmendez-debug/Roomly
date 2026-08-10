@@ -4,3 +4,5 @@
     <classpathentry kind="lib" path="webapp/WEB-INF/lib/mysql-connector-j-26.7.0.jar"/>
     <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 </classpath>
+
+//para copilar lo de .java en la terminal y se crea las class: javac -cp ".;webapp/WEB-INF/lib/mysql-connector-j-26.7.0.jar;C:\DESCARGA DE SOFTWARE\JAVA\apache-tomcat-9.0.120-windows-x64\apache-tomcat-9.0.120\lib\servlet-api.jar" -d webapp/WEB-INF/classes JAVA/*.java

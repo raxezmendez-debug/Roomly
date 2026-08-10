@@ -1,0 +1,98 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f7fb;
+}
+
+.roomly {
+  min-height: 100vh;
+}
+
+.header {
+  height: 70px;
+  background: white;
+  border-bottom: 1px solid #ddd;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 40px;
+}
+
+.header h1 {
+  margin: 0;
+  color: #4f46e5;
+}
+
+.new-reservation {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.calendar-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.calendar-header h2 {
+  margin: 0;
+}
+
+.calendar-header button {
+  border: none;
+  background: white;
+  border-radius: 8px;
+  font-size: 25px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.day {
+  min-height: 180px;
+  border-right: 1px solid #ddd;
+  padding: 15px;
+}
+
+.day:last-child {
+  border-right: none;
+}
+
+.day strong {
+  display: block;
+  color: #666;
+  font-size: 13px;
+}
+
+.day span {
+  display: block;
+  margin-top: 8px;
+  font-size: 25px;
+  font-weight: bold;
+}
