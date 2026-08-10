@@ -1,14 +1,3 @@
-// File: javascript.js
-// (EN) Core calendar logic: renders the room matrix, fetches reservations
-//       from the /ReservaServlet endpoint, and handles UI interactions
-//       such as opening modals and drag & drop.
-// (ES) Lógica principal del calendario: renderiza la matriz de habitaciones,
-//       obtiene las reservas desde el endpoint /ReservaServlet y gestiona la
-//       interacción de la UI (modales, arrastrar y soltar).
-//
-// Mantengo los comentarios en inglés cuando ya existen y añado estas
-// explicaciones en español para ayudarte mientras aprendes.
-
 // Configuración de Habitaciones (no hay tabla de habitaciones en la BD, se mantiene local)
         const habitaciones = [
             { id: "DQ(2)", nombre: "DQ(2)", tipo: "Deluxe Queen", estado: "Limpio" },
@@ -38,11 +27,13 @@
             const headerDaysRow = document.getElementById("headerDaysRow");
             const gridMatrixRows = document.getElementById("gridMatrixRows");
             const selectHabitacion = document.getElementById("selectHabitacion");
+            const editHabitacion = document.getElementById("editHabitacion");
 
             roomListContainer.innerHTML = "";
             headerDaysRow.innerHTML = "";
             gridMatrixRows.innerHTML = "";
             selectHabitacion.innerHTML = "";
+            if (editHabitacion) editHabitacion.innerHTML = "";
 
             // Renderizar la cabecera de días (Del 12 al 26)
             for (let i = 0; i < numColumnasDias; i++) {
@@ -59,11 +50,19 @@
 
             // Renderizar cada Habitación y su Fila de Celdas
             habitaciones.forEach(hab => {
-                // Populate select option
+                // Populate select option (modal Nueva Reserva)
                 const opt = document.createElement("option");
                 opt.value = hab.id;
                 opt.textContent = `${hab.tipo} - ${hab.nombre}`;
                 selectHabitacion.appendChild(opt);
+
+                // Populate select option (modal Editar Reserva)
+                if (editHabitacion) {
+                    const optEdit = document.createElement("option");
+                    optEdit.value = hab.id;
+                    optEdit.textContent = `${hab.tipo} - ${hab.nombre}`;
+                    editHabitacion.appendChild(optEdit);
+                }
 
                 // Sidebar room label
                 const roomCell = document.createElement("div");
@@ -106,10 +105,7 @@
         // ------------------------------------------------------------------
 
         // Trae las reservas reales desde la base de datos y las transforma
-        // al formato que usa el calendario (startCol/span/clase de estado).
-        // (ES) Función que realiza un GET a /ReservaServlet y convierte cada
-        // respuesta en el formato que usa la UI.
-        // (EN) Fetches reservations from the server and maps them to UI objects.
+        // al formato que usa el calendario.
         async function cargarReservas() {
             try {
                 const respuesta = await fetch("ReservaServlet");
@@ -128,30 +124,34 @@
             }
         }
 
-        // Convierte una fila JSON del servlet (fechas incluidas) en el objeto
-        // que renderizarReservas() ya sabe pintar.
-        // (ES) Traduce fechas y calcula columna de inicio y duración (span).
-        // (EN) Converts servlet JSON row into a visual reservation object.
+        // Convierte una fila JSON del servlet en el objeto de trabajo que usa
+        // el calendario. Guarda las fechas reales (Date) para poder recalcular
+        // la posición y también para poblar el formulario de edición.
         function construirReservaVisual(r) {
-            const fechaEntrada = new Date(r.fechaEntrada + "T00:00:00");
-            const fechaSalida = new Date(r.fechaSalida + "T00:00:00");
-            const msPorDia = 24 * 60 * 60 * 1000;
-
-            const startCol = Math.round((fechaEntrada - fechaInicioCalendario) / msPorDia);
-            let span = Math.round((fechaSalida - fechaEntrada) / msPorDia);
-            if (span < 1) span = 1;
-
             return {
                 id: r.id,
+                nombre: r.nombre,
+                apellido: r.apellido,
                 huesped: `${r.nombre} ${r.apellido}`.trim(),
                 documento: r.documento,
                 telefono: r.telefono,
                 correo: r.correo,
                 habitacion: r.habitacion,
-                startCol: startCol,
-                span: span,
-                estado: mapearEstadoAClase(r.estado)
+                fechaEntrada: new Date(r.fechaEntrada + "T00:00:00"),
+                fechaSalida: new Date(r.fechaSalida + "T00:00:00"),
+                estadoTexto: r.estado,                          // valor crudo tal cual está en la BD
+                estado: mapearEstadoAClase(r.estado)             // clase CSS (status-confirmed, etc.)
             };
+        }
+
+        // Calcula en qué columna del calendario empieza la barra y cuántas
+        // columnas ocupa, a partir de las fechas reales de la reserva.
+        function calcularPosicion(reserva) {
+            const msPorDia = 24 * 60 * 60 * 1000;
+            const startCol = Math.round((reserva.fechaEntrada - fechaInicioCalendario) / msPorDia);
+            let span = Math.round((reserva.fechaSalida - reserva.fechaEntrada) / msPorDia);
+            if (span < 1) span = 1;
+            return { startCol, span };
         }
 
         // La columna "estado" en la BD guarda texto libre (Confirmada, Pendiente, etc.)
@@ -165,24 +165,37 @@
             return "status-confirmed";
         }
 
+        // Formatea una fecha como YYYY-MM-DD para <input type="date"> y para
+        // enviarla al servlet (sin usar toISOString, que desfasa por huso horario).
+        function formatearFechaISO(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, "0");
+            const d = String(date.getDate()).padStart(2, "0");
+            return `${y}-${m}-${d}`;
+        }
+
+        // Formatea una fecha en español para mostrarla en la vista de detalle.
+        function formatearFechaLegible(date) {
+            return date.toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric" });
+        }
+
         // Renderizar Barras de Reserva con estilo trapezoidal
-        // (ES) Crea elementos DOM para cada reserva visible y les aplica
-        // estilos, posición y comportamiento de arrastrar.
-        // (EN) Renders reservation bars in the calendar grid.
         function renderizarReservas() {
             // Limpiar reservas existentes
             document.querySelectorAll(".reservation-bar").forEach(el => el.remove());
 
             reservas.forEach(res => {
+                const { startCol, span } = calcularPosicion(res);
+
                 // Si la reserva cae completamente fuera del rango visible del calendario, se omite
-                if (res.startCol + res.span <= 0 || res.startCol >= numColumnasDias) return;
+                if (startCol + span <= 0 || startCol >= numColumnasDias) return;
 
                 const targetRow = document.querySelector(`[data-room-id="${res.habitacion}"]`);
                 if (targetRow) {
                     const bar = document.createElement("div");
                     bar.className = `reservation-bar absolute h-10 top-2 z-10 px-4 flex items-center shadow-md font-medium text-xs ${res.estado}`;
-                    bar.style.left = `${res.startCol * anchoColumnaPx + 8}px`;
-                    bar.style.width = `${res.span * anchoColumnaPx - 16}px`;
+                    bar.style.left = `${startCol * anchoColumnaPx + 8}px`;
+                    bar.style.width = `${span * anchoColumnaPx - 16}px`;
                     bar.draggable = true;
                     bar.id = `reserva-${res.id}`;
 
@@ -191,9 +204,12 @@
                         <span class="truncate">${res.huesped}</span>
                     `;
 
+                    // Clic -> abre el detalle de la reserva (solo lectura + botón Editar)
+                    bar.addEventListener("click", () => abrirDetalleReserva(res.id));
+
                     // Drag Events
                     bar.addEventListener("dragstart", (e) => {
-                        e.dataTransfer.setData("text/plain", JSON.stringify(res));
+                        e.dataTransfer.setData("text/plain", JSON.stringify({ id: res.id, startCol }));
                         bar.classList.add("opacity-50");
                     });
 
@@ -207,9 +223,6 @@
         }
 
         // Lógica de Drag & Drop para mover reservas entre fechas o habitaciones
-        // (ES) handleDragOver/Leave/Drop gestionan la interacción visual y al
-        // soltar actualizan sólo la estructura en memoria (no la BD).
-        // (EN) Drag & drop handlers for moving reservations visually.
         function handleDragOver(e) {
             e.preventDefault();
             e.currentTarget.classList.add("drag-over");
@@ -219,7 +232,9 @@
             e.currentTarget.classList.remove("drag-over");
         }
 
-        function handleDrop(e) {
+        // Al soltar la barra: actualiza en memoria, repinta de inmediato, y
+        // guarda el cambio en MySQL (fecha_entrada, fecha_salida, habitacion).
+        async function handleDrop(e) {
             e.preventDefault();
             e.currentTarget.classList.remove("drag-over");
 
@@ -227,18 +242,50 @@
             const newRoomId = e.currentTarget.dataset.roomId;
             const newStartDay = parseInt(e.currentTarget.dataset.dayIndex);
 
-            // Actualiza el objeto en memoria y repinta.
-            // (Guardar el nuevo día/habitación en la BD queda pendiente como
-            // siguiente paso: haría falta un endpoint PUT/POST adicional en el servlet).
             const resObj = reservas.find(r => r.id === resData.id);
-            if (resObj) {
-                resObj.habitacion = newRoomId;
-                resObj.startCol = newStartDay;
-                renderizarReservas();
+            if (!resObj) return;
+
+            const deltaDias = newStartDay - resData.startCol;
+            if (deltaDias === 0 && newRoomId === resObj.habitacion) return; // no cambió nada
+
+            // Actualiza en memoria y repinta de inmediato (respuesta visual instantánea)
+            const nuevaFechaEntrada = new Date(resObj.fechaEntrada);
+            nuevaFechaEntrada.setDate(nuevaFechaEntrada.getDate() + deltaDias);
+            const nuevaFechaSalida = new Date(resObj.fechaSalida);
+            nuevaFechaSalida.setDate(nuevaFechaSalida.getDate() + deltaDias);
+
+            resObj.habitacion = newRoomId;
+            resObj.fechaEntrada = nuevaFechaEntrada;
+            resObj.fechaSalida = nuevaFechaSalida;
+            renderizarReservas();
+
+            // Guarda el movimiento en la base de datos
+            try {
+                const params = new URLSearchParams();
+                params.append("accion", "actualizar");
+                params.append("id", resObj.id);
+                params.append("documento", resObj.documento || "");
+                params.append("nombres", resObj.nombre || "");
+                params.append("apellidos", resObj.apellido || "");
+                params.append("telefono", resObj.telefono || "");
+                params.append("correo", resObj.correo || "");
+                params.append("habitacion", resObj.habitacion);
+                params.append("fechaEntrada", formatearFechaISO(resObj.fechaEntrada));
+                params.append("fechaSalida", formatearFechaISO(resObj.fechaSalida));
+                params.append("estado", resObj.estadoTexto);
+
+                const resp = await fetch("ReservaServlet", { method: "POST", body: params });
+                if (!resp.ok) throw new Error("Error HTTP " + resp.status);
+
+            } catch (error) {
+                console.error("No se pudo guardar el movimiento de la reserva en la BD:", error);
+                alert("El cambio se ve en pantalla, pero no se pudo guardar en la base de datos. Recarga la página e inténtalo de nuevo.");
             }
         }
 
-        // Modal Handlers
+        // ------------------------------------------------------------------
+        // Modal "+ Nueva Reserva"
+        // ------------------------------------------------------------------
         function abrirModal() {
             document.getElementById("modalReserva").classList.remove("hidden");
         }
@@ -247,48 +294,111 @@
             document.getElementById("modalReserva").classList.add("hidden");
         }
 
-        let reservaActualEditando = null;
+        // ------------------------------------------------------------------
+        // Modal "Detalle de Reserva" (solo lectura) + "Editar"
+        // ------------------------------------------------------------------
+        let reservaActualDetalle = null;
 
-        function abrirModalEditar(idReserva) {
-            const reserva = reservas.find(r => r.id === idReserva);
+        function abrirDetalleReserva(id) {
+            const reserva = reservas.find(r => r.id === id);
             if (!reserva) return;
 
-            // (ES) Guardamos la referencia de la reserva que se está editando.
-            // (EN) Keep the reference to the reservation being edited.
-            reservaActualEditando = reserva;
-
-            // Rellenar los campos del formulario con los datos encontrados
-            document.getElementById("editId").value = reserva.id;
-            document.getElementById("editHuesped").value = reserva.huesped;
-            document.getElementById("editDocumento").value = reserva.documento || "";
-            document.getElementById("editTelefono").value = reserva.telefono || "";
-            document.getElementById("editCorreo").value = reserva.correo || "";
-            document.getElementById("editEstado").value = reserva.estado;
-
-            document.getElementById("modalEditarReserva").classList.remove("hidden");
+            reservaActualDetalle = reserva;
+            mostrarVistaDetalle(reserva);
+            document.getElementById("modalDetalleReserva").classList.remove("hidden");
         }
 
-        function cerrarModalEditar() {
-            document.getElementById("modalEditarReserva").classList.add("hidden");
-            reservaActualEditando = null;
+        function mostrarVistaDetalle(reserva) {
+            document.getElementById("detalleHuesped").textContent = reserva.huesped;
+            document.getElementById("detalleHabitacion").textContent = reserva.habitacion;
+            document.getElementById("detalleDocumento").textContent = reserva.documento || "—";
+            document.getElementById("detalleTelefono").textContent = reserva.telefono || "—";
+            document.getElementById("detalleCorreo").textContent = reserva.correo || "—";
+            document.getElementById("detalleFechaEntrada").textContent = formatearFechaLegible(reserva.fechaEntrada);
+            document.getElementById("detalleFechaSalida").textContent = formatearFechaLegible(reserva.fechaSalida);
+
+            const badge = document.getElementById("detalleEstadoBadge");
+            badge.textContent = reserva.estadoTexto;
+            badge.className = `text-xs font-semibold px-3 py-1.5 rounded-full ${reserva.estado}`;
+
+            document.getElementById("vistaDetalleReserva").classList.remove("hidden");
+            document.getElementById("formEditarReserva").classList.add("hidden");
         }
 
-        // Simulación de actualización de datos (local, aún no persiste en BD)
+        function mostrarVistaEdicion() {
+            const r = reservaActualDetalle;
+            if (!r) return;
+
+            document.getElementById("editId").value = r.id;
+            document.getElementById("editNombres").value = r.nombre;
+            document.getElementById("editApellidos").value = r.apellido;
+            document.getElementById("editDocumento").value = r.documento || "";
+            document.getElementById("editTelefono").value = r.telefono || "";
+            document.getElementById("editCorreo").value = r.correo || "";
+            document.getElementById("editHabitacion").value = r.habitacion;
+            document.getElementById("editFechaEntrada").value = formatearFechaISO(r.fechaEntrada);
+            document.getElementById("editFechaSalida").value = formatearFechaISO(r.fechaSalida);
+            document.getElementById("editEstado").value = r.estadoTexto;
+
+            document.getElementById("vistaDetalleReserva").classList.add("hidden");
+            document.getElementById("formEditarReserva").classList.remove("hidden");
+        }
+
+        function cancelarEdicionReserva() {
+            if (reservaActualDetalle) mostrarVistaDetalle(reservaActualDetalle);
+        }
+
+        function cerrarModalDetalle() {
+            document.getElementById("modalDetalleReserva").classList.add("hidden");
+            reservaActualDetalle = null;
+        }
+
+        // Guardar edición: por ahora actualiza SOLO en memoria (no persiste en
+        // la BD todavía). El endpoint del servlet ya soporta accion=actualizar,
+        // así que cuando quieras guardar la edición en MySQL, descomenta el
+        // bloque fetch(...) de más abajo (es igual al que usa handleDrop).
         const formEditar = document.getElementById("formEditarReserva");
         if (formEditar) {
-            formEditar.addEventListener("submit", function(e) {
+            formEditar.addEventListener("submit", function (e) {
                 e.preventDefault();
-                if (reservaActualEditando) {
-                    reservaActualEditando.huesped = document.getElementById("editHuesped").value;
-                    reservaActualEditando.estado = document.getElementById("editEstado").value;
-                    cerrarModalEditar();
-                    renderizarReservas();
-                }
+                if (!reservaActualDetalle) return;
+
+                reservaActualDetalle.nombre = document.getElementById("editNombres").value;
+                reservaActualDetalle.apellido = document.getElementById("editApellidos").value;
+                reservaActualDetalle.huesped = `${reservaActualDetalle.nombre} ${reservaActualDetalle.apellido}`.trim();
+                reservaActualDetalle.documento = document.getElementById("editDocumento").value;
+                reservaActualDetalle.telefono = document.getElementById("editTelefono").value;
+                reservaActualDetalle.correo = document.getElementById("editCorreo").value;
+                reservaActualDetalle.habitacion = document.getElementById("editHabitacion").value;
+                reservaActualDetalle.fechaEntrada = new Date(document.getElementById("editFechaEntrada").value + "T00:00:00");
+                reservaActualDetalle.fechaSalida = new Date(document.getElementById("editFechaSalida").value + "T00:00:00");
+                reservaActualDetalle.estadoTexto = document.getElementById("editEstado").value;
+                reservaActualDetalle.estado = mapearEstadoAClase(reservaActualDetalle.estadoTexto);
+
+                /* --- Para que la edición también quede guardada en MySQL, descomenta esto: ---
+                const params = new URLSearchParams();
+                params.append("accion", "actualizar");
+                params.append("id", reservaActualDetalle.id);
+                params.append("documento", reservaActualDetalle.documento);
+                params.append("nombres", reservaActualDetalle.nombre);
+                params.append("apellidos", reservaActualDetalle.apellido);
+                params.append("telefono", reservaActualDetalle.telefono);
+                params.append("correo", reservaActualDetalle.correo);
+                params.append("habitacion", reservaActualDetalle.habitacion);
+                params.append("fechaEntrada", formatearFechaISO(reservaActualDetalle.fechaEntrada));
+                params.append("fechaSalida", formatearFechaISO(reservaActualDetalle.fechaSalida));
+                params.append("estado", reservaActualDetalle.estadoTexto);
+                fetch("ReservaServlet", { method: "POST", body: params })
+                    .catch(err => console.error("No se pudo guardar la edición en la BD:", err));
+                --------------------------------------------------------------------------------- */
+
+                cerrarModalDetalle();
+                renderizarReservas();
             });
         }
 
         // Inicializar al cargar la página
-        window.onload = function() {
+        window.onload = function () {
             inicializarCalendario();
             cargarReservas();
         };

@@ -296,3 +296,20 @@ label.block { display: block; }
 
 /* --- Usada por el JS al pintar cada celda del calendario --- */
 .grid-cell { }
+
+/* --- Utilidades agregadas para dar más espacio a los modales --- */
+.p-7 { padding: 1.75rem; }
+.px-3\.5 { padding-left: 0.875rem; padding-right: 0.875rem; }
+.py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+.py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+.mb-1\.5 { margin-bottom: 0.375rem; }
+.space-y-5 > * + * { margin-top: 1.25rem; }
+.gap-5 { gap: 1.25rem; }
+.w-11 { width: 2.75rem; }
+.h-11 { height: 2.75rem; }
+
+/* --- Badge de estado dentro del modal de Detalle (reusa los mismos colores que las barras) --- */
+#detalleEstadoBadge.status-checkin   { background-color: var(--emerald-100); color: var(--emerald-700); }
+#detalleEstadoBadge.status-confirmed { background-color: var(--indigo-100);  color: var(--indigo-700);  }
+#detalleEstadoBadge.status-pending   { background-color: #fee2e2;            color: #b91c1c;            }
+#detalleEstadoBadge.status-checkout  { background-color: var(--slate-100);   color: var(--slate-600);   }
