@@ -1,7 +1,14 @@
+/* --------------------------------------------------
+   BLOQUE 1: RESET GLOBAL Y BASE DEL DOCUMENTO
+   -------------------------------------------------- */
+/* Aplica box-sizing a todos los elementos para que width y height
+   incluyan padding y border sin causar desbordes. */
 * {
   box-sizing: border-box;
 }
 
+/* Estilos base del cuerpo de la página: margen 0, tipo de letra,
+   fondo gris claro y color de texto oscuro. */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -9,10 +16,20 @@ body {
   color: #1f2937;
 }
 
+/* --------------------------------------------------
+   BLOQUE 2: CONTENEDOR PRINCIPAL DE LA APP
+   -------------------------------------------------- */
+/* roomly es el contenedor principal del calendario completo.
+   min-height: 100vh hace que ocupe toda la altura de la pantalla. */
 .roomly {
   min-height: 100vh;
 }
 
+/* --------------------------------------------------
+   BLOQUE 3: CABECERA SUPERIOR
+   -------------------------------------------------- */
+/* .header define la barra superior con fondo blanco, espacio interno,
+   distribución horizontal y línea inferior para separar visualmente. */
 .header {
   background: white;
   padding: 20px 40px;
@@ -22,17 +39,20 @@ body {
   border-bottom: 1px solid #ddd;
 }
 
+/* .logo estiliza el nombre principal de la app. */
 .logo {
   font-size: 28px;
   font-weight: bold;
   color: #2563eb;
 }
 
+/* .subtitle da estilo a la pequeña descripción debajo del logo. */
 .subtitle {
   color: #6b7280;
   margin-top: 4px;
 }
 
+/* .new-reservation da estilo al botón para crear una nueva reserva. */
 .new-reservation {
   background: #2563eb;
   color: white;
@@ -43,12 +63,21 @@ body {
   font-size: 15px;
 }
 
+/* --------------------------------------------------
+   BLOQUE 4: CONTENEDOR DEL CALENDARIO
+   -------------------------------------------------- */
+/* .calendar-container centra el calendario dentro de la página y
+   limita su ancho máximo para que se vea ordenado. */
 .calendar-container {
   max-width: 1200px;
   margin: 30px auto;
   padding: 0 20px;
 }
 
+/* --------------------------------------------------
+   BLOQUE 5: CABECERA DEL MES
+   -------------------------------------------------- */
+/* .calendar-header alinea el mes y los botones de navegación en una fila. */
 .calendar-header {
   display: flex;
   justify-content: center;
@@ -57,6 +86,7 @@ body {
   margin-bottom: 20px;
 }
 
+/* Estilo de los botones de navegación del mes: flecha anterior y siguiente. */
 .calendar-header button {
   border: none;
   background: white;
@@ -67,11 +97,16 @@ body {
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
+/* El título del mes tiene un ancho mínimo y se centra. */
 .calendar-header h2 {
   min-width: 180px;
   text-align: center;
 }
 
+/* --------------------------------------------------
+   BLOQUE 6: GRILLA DEL CALENDARIO
+   -------------------------------------------------- */
+/* .calendar crea una cuadrícula con 7 columnas, una por cada día de la semana. */
 .calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -81,6 +116,7 @@ body {
   box-shadow: 0 2px 10px rgba(0,0,0,0.08);
 }
 
+/* Cada celda del calendario recibe altura mínima, borde y fondo blanco. */
 .day {
   min-height: 110px;
   border-right: 1px solid #e5e7eb;
@@ -89,6 +125,7 @@ body {
   background: white;
 }
 
+/* Estilo del texto del nombre del día (DOM, LUN, MAR...) */
 .day strong {
   display: block;
   color: #6b7280;
@@ -96,25 +133,39 @@ body {
   margin-bottom: 10px;
 }
 
+/* Estilo de los números dentro de cada día del calendario. */
 .day span {
   font-size: 24px;
   font-weight: bold;
 }
 
+/* --------------------------------------------------
+   BLOQUE 7: ESTILOS PARA EL DÍA ACTUAL
+   -------------------------------------------------- */
+/* .today resalta el día actual con fondo azul claro y borde azul intenso. */
 .today {
   background: #dbeafe;
   border: 3px solid #2563eb;
 }
 
+/* El texto del día actual cambia a color azul. */
 .today strong {
   color: #2563eb;
 }
 
+/* --------------------------------------------------
+   BLOQUE 8: ESTILOS PARA DÍAS PASADOS
+   -------------------------------------------------- */
+/* .past oscurece los días ya vencidos para diferenciarlos del día actual. */
 .past {
   background: #e5e7eb;
   color: #6b7280;
 }
 
+/* --------------------------------------------------
+   BLOQUE 9: RESPONSIVE DESIGN
+   -------------------------------------------------- */
+/* Ajusta el diseño para pantallas pequeñas debajo de 700px. */
 @media (max-width: 700px) {
   .header {
     padding: 15px;
