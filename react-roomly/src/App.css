@@ -1,5 +1,5 @@
 /* --------------------------------------------------
-   BLOQUE 1: RESET GLOBAL Y BASE DEL DOCUMENTO
+  BLOQUE 1: RESET GLOBAL Y BASE DEL DOCUMENTO
    -------------------------------------------------- */
 /* Aplica box-sizing a todos los elementos para que width y height
    incluyan padding y border sin causar desbordes. */
@@ -17,7 +17,7 @@ body {
 }
 
 /* --------------------------------------------------
-   BLOQUE 2: CONTENEDOR PRINCIPAL DE LA APP
+  BLOQUE 2: CONTENEDOR PRINCIPAL DE LA APP
    -------------------------------------------------- */
 /* roomly es el contenedor principal del calendario completo.
    min-height: 100vh hace que ocupe toda la altura de la pantalla. */
@@ -26,7 +26,7 @@ body {
 }
 
 /* --------------------------------------------------
-   BLOQUE 3: CABECERA SUPERIOR
+  BLOQUE 3: CABECERA SUPERIOR
    -------------------------------------------------- */
 /* .header define la barra superior con fondo blanco, espacio interno,
    distribución horizontal y línea inferior para separar visualmente. */
@@ -64,7 +64,7 @@ body {
 }
 
 /* --------------------------------------------------
-   BLOQUE 4: CONTENEDOR DEL CALENDARIO
+  BLOQUE 4: CONTENEDOR DEL CALENDARIO
    -------------------------------------------------- */
 /* .calendar-container centra el calendario dentro de la página y
    limita su ancho máximo para que se vea ordenado. */
@@ -75,7 +75,7 @@ body {
 }
 
 /* --------------------------------------------------
-   BLOQUE 5: CABECERA DEL MES
+  BLOQUE 5: CABECERA DEL MES
    -------------------------------------------------- */
 /* .calendar-header alinea el mes y los botones de navegación en una fila. */
 .calendar-header {
@@ -104,7 +104,7 @@ body {
 }
 
 /* --------------------------------------------------
-   BLOQUE 6: GRILLA DEL CALENDARIO
+  BLOQUE 6: GRILLA DEL CALENDARIO
    -------------------------------------------------- */
 /* .calendar crea una cuadrícula con 7 columnas, una por cada día de la semana. */
 .calendar {
@@ -140,7 +140,7 @@ body {
 }
 
 /* --------------------------------------------------
-   BLOQUE 7: ESTILOS PARA EL DÍA ACTUAL
+  BLOQUE 7: ESTILOS PARA EL DÍA ACTUAL
    -------------------------------------------------- */
 /* .today resalta el día actual con fondo azul claro y borde azul intenso. */
 .today {
@@ -154,7 +154,7 @@ body {
 }
 
 /* --------------------------------------------------
-   BLOQUE 8: ESTILOS PARA DÍAS PASADOS
+  BLOQUE 8: ESTILOS PARA DÍAS PASADOS
    -------------------------------------------------- */
 /* .past oscurece los días ya vencidos para diferenciarlos del día actual. */
 .past {
@@ -163,7 +163,7 @@ body {
 }
 
 /* --------------------------------------------------
-   BLOQUE 9: RESPONSIVE DESIGN
+  BLOQUE 9: RESPONSIVE DESIGN
    -------------------------------------------------- */
 /* Ajusta el diseño para pantallas pequeñas debajo de 700px. */
 @media (max-width: 700px) {

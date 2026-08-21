@@ -1,11 +1,10 @@
-import { useState } from "react";
-import "./App.css";
-
 // ---------------------------------------------
 // BLOQUE 1: IMPORTS Y CONEXIÓN CON REACT/CSS
 // ---------------------------------------------
 // Importa el hook useState de React para poder guardar el mes y el año del calendario.
 // Importa el archivo App.css para conectar este componente con sus estilos visuales.
+import { useState } from "react";
+import "./App.css";
 
 // ---------------------------------------------
 // BLOQUE 2: COMPONENTE PRINCIPAL

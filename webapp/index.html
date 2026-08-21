@@ -65,12 +65,12 @@
             </div>
 
             <div class="flex items-center space-x-2">
-                <button class="p-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 text-xs"><i class="fa-solid fa-chevron-left"></i></button>
-                <button class="px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 font-semibold text-xs uppercase tracking-wider">HOY</button>
-                <button class="p-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 text-xs"><i class="fa-solid fa-chevron-right"></i></button>
+                <button id="mesAnterior" class="p-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 text-xs" aria-label="Mes anterior"><i class="fa-solid fa-chevron-left"></i></button>
+                <button id="irAHoy" class="px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 font-semibold text-xs uppercase tracking-wider">HOY</button>
+                <button id="mesSiguiente" class="p-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 text-xs" aria-label="Mes siguiente"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
 
-            <h3 class="text-lg font-bold text-slate-800 ml-2">FEBRERO 2026</h3>
+            <h3 id="mesActual" class="text-lg font-bold text-slate-800 ml-2"></h3>
         </div>
 
         <!-- Leyendas / Filtros -->

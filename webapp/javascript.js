@@ -18,8 +18,31 @@
         const numColumnasDias = 15; // Días visibles con scroll horizontal
         const anchoColumnaPx = 128; // 128px = w-32
 
-        // Primer día visible en la grilla (coincide con el encabezado "FEBRERO 2026", día 12)
-        const fechaInicioCalendario = new Date(2026, 1, 12); // mes 1 = Febrero (0-indexado)
+        const hoy = new Date();
+        const nombresMeses = [
+            "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO",
+            "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"
+        ];
+        let mesCalendario = hoy.getMonth();
+        let añoCalendario = hoy.getFullYear();
+        let fechaInicioCalendario = new Date(añoCalendario, mesCalendario, 1);
+
+        function actualizarMesCalendario(direccion) {
+            const nuevaFecha = new Date(añoCalendario, mesCalendario + direccion, 1);
+            mesCalendario = nuevaFecha.getMonth();
+            añoCalendario = nuevaFecha.getFullYear();
+            fechaInicioCalendario = nuevaFecha;
+            document.getElementById("mesActual").textContent = `${nombresMeses[mesCalendario]} ${añoCalendario}`;
+            inicializarCalendario();
+        }
+
+        function irAlMesActual() {
+            mesCalendario = hoy.getMonth();
+            añoCalendario = hoy.getFullYear();
+            fechaInicioCalendario = new Date(añoCalendario, mesCalendario, 1);
+            document.getElementById("mesActual").textContent = `${nombresMeses[mesCalendario]} ${añoCalendario}`;
+            inicializarCalendario();
+        }
 
         // Renderizar Matrix del Calendario
         function inicializarCalendario() {
@@ -35,15 +58,18 @@
             selectHabitacion.innerHTML = "";
             if (editHabitacion) editHabitacion.innerHTML = "";
 
-            // Renderizar la cabecera de días (Del 12 al 26)
+            // Renderizar la cabecera de días desde el primer día del mes seleccionado.
             for (let i = 0; i < numColumnasDias; i++) {
-                const diaNum = 12 + i;
+                const fechaDia = new Date(fechaInicioCalendario);
+                fechaDia.setDate(fechaDia.getDate() + i);
+                const diaNum = fechaDia.getDate();
+                const esHoy = fechaDia.toDateString() === hoy.toDateString();
                 const dayHeaderCell = document.createElement("div");
-                dayHeaderCell.className = "w-32 border-r border-slate-200 flex flex-col justify-between p-2 shrink-0 text-center select-none";
+                dayHeaderCell.className = `w-32 border-r border-slate-200 flex flex-col justify-between p-2 shrink-0 text-center select-none ${esHoy ? "current-day" : ""}`;
                 dayHeaderCell.innerHTML = `
-                    <div class="text-[10px] font-bold text-slate-400 uppercase">FEBRERO</div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase">${nombresMeses[fechaDia.getMonth()]}</div>
                     <div class="font-bold text-slate-800 text-base">${diaNum}</div>
-                    <div class="bg-indigo-50 text-indigo-600 rounded text-[10px] py-0.5 font-bold">94 / $159</div>
+                    <div class="bg-indigo-50 text-indigo-600 rounded text-[10px] py-0.5 font-bold">${esHoy ? "HOY" : "94 / $159"}</div>
                 `;
                 headerDaysRow.appendChild(dayHeaderCell);
             }
@@ -399,6 +425,10 @@
 
         // Inicializar al cargar la página
         window.onload = function () {
+            document.getElementById("mesAnterior").addEventListener("click", () => actualizarMesCalendario(-1));
+            document.getElementById("mesSiguiente").addEventListener("click", () => actualizarMesCalendario(1));
+            document.getElementById("irAHoy").addEventListener("click", irAlMesActual);
+            document.getElementById("mesActual").textContent = `${nombresMeses[mesCalendario]} ${añoCalendario}`;
             inicializarCalendario();
             cargarReservas();
         };
